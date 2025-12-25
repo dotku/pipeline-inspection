@@ -5,7 +5,7 @@ import { getApiUrl } from "@/lib/config";
 
 // Preset demo videos
 const DEMO_PRESETS = {
-  bigbuckbunny: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4",
+  bigbuckbunny: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4",
   rtspDemo: "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov",
 };
 
