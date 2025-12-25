@@ -2,7 +2,7 @@
 Configuration management for Pipeline Inspection System
 """
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, Union
 import os
 from pathlib import Path
 
@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
-    # Camera
-    CAMERA_INDEX: int = 0
+    # Camera (can be USB index or URL for RTSP/HTTP)
+    CAMERA_INDEX: Union[int, str] = "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4"
     CAMERA_WIDTH: int = 640
     CAMERA_HEIGHT: int = 480
     CAMERA_FPS: int = 30
