@@ -367,12 +367,18 @@ async def websocket_video_stream(websocket: WebSocket):
 
     except WebSocketDisconnect:
         logger.info("WebSocket disconnected")
-        active_connections.remove(websocket)
-
-    except Exception as e:
-        logger.error(f"WebSocket error: {e}")
         if websocket in active_connections:
             active_connections.remove(websocket)
+
+    except Exception as e:
+        logger.error(f"WebSocket error: {type(e).__name__}: {str(e)}")
+        logger.exception("Full traceback:")
+        if websocket in active_connections:
+            active_connections.remove(websocket)
+        try:
+            await websocket.close()
+        except:
+            pass
 
 
 if __name__ == "__main__":

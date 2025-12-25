@@ -9,6 +9,18 @@ from dataclasses import dataclass
 from datetime import datetime
 import logging
 from pathlib import Path
+import torch
+
+# CRITICAL: Monkey patch torch.load to disable weights_only before importing ultralytics
+# This is necessary for PyTorch 2.6+ which changed the default to weights_only=True
+_original_torch_load = torch.load
+
+def _patched_torch_load(*args, **kwargs):
+    """Patched torch.load that sets weights_only=False for compatibility"""
+    kwargs.setdefault('weights_only', False)
+    return _original_torch_load(*args, **kwargs)
+
+torch.load = _patched_torch_load
 
 from ultralytics import YOLO
 from config import settings

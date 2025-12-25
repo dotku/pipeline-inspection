@@ -119,8 +119,18 @@ class Camera:
         ret, frame = self.cap.read()
 
         if not ret:
-            logger.warning("Failed to read frame from camera")
-            return False, None
+            # For video files (not USB cameras), loop back to the beginning
+            if self.source_type in ['RTSP', 'HTTP'] and isinstance(self.camera_source, str):
+                logger.info("Video ended, looping back to start")
+                self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                ret, frame = self.cap.read()
+
+                if not ret:
+                    logger.warning("Failed to read frame from camera")
+                    return False, None
+            else:
+                logger.warning("Failed to read frame from camera")
+                return False, None
 
         return True, frame
 

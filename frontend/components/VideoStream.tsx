@@ -20,6 +20,16 @@ export default function VideoStream({
   const lastFrameTime = useRef(Date.now());
   const frameCount = useRef(0);
 
+  // Store callbacks in refs to avoid reconnection on callback changes
+  const onNewDetectionRef = useRef(onNewDetection);
+  const onConnectionChangeRef = useRef(onConnectionChange);
+
+  // Update refs when callbacks change
+  useEffect(() => {
+    onNewDetectionRef.current = onNewDetection;
+    onConnectionChangeRef.current = onConnectionChange;
+  }, [onNewDetection, onConnectionChange]);
+
   useEffect(() => {
     const connectWebSocket = () => {
       const ws = new WebSocket(getWebSocketUrl("/ws/video"));
@@ -28,7 +38,7 @@ export default function VideoStream({
       ws.onopen = () => {
         console.log("WebSocket connected");
         setIsStreaming(true);
-        onConnectionChange(true);
+        onConnectionChangeRef.current(true);
       };
 
       ws.onmessage = (event) => {
@@ -74,7 +84,7 @@ export default function VideoStream({
           // Handle detections
           if (data.detections && data.detections.length > 0) {
             data.detections.forEach((detection: Detection) => {
-              onNewDetection(detection);
+              onNewDetectionRef.current(detection);
             });
           }
         } catch (error) {
@@ -83,15 +93,18 @@ export default function VideoStream({
       };
 
       ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
+        // Suppress empty error objects (normal during reconnection)
+        if (Object.keys(error).length > 0) {
+          console.error("WebSocket error:", error);
+        }
         setIsStreaming(false);
-        onConnectionChange(false);
+        onConnectionChangeRef.current(false);
       };
 
       ws.onclose = () => {
         console.log("WebSocket disconnected");
         setIsStreaming(false);
-        onConnectionChange(false);
+        onConnectionChangeRef.current(false);
 
         // Attempt reconnection after 3 seconds
         setTimeout(connectWebSocket, 3000);
@@ -105,7 +118,7 @@ export default function VideoStream({
         wsRef.current.close();
       }
     };
-  }, [onNewDetection, onConnectionChange]);
+  }, []); // Empty deps - callbacks accessed via refs
 
   return (
     <div className="bg-slate-800 rounded-lg shadow-2xl overflow-hidden border border-slate-700">

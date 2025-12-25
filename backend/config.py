@@ -2,6 +2,7 @@
 Configuration management for Pipeline Inspection System
 """
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from typing import List, Union
 import os
 from pathlib import Path
@@ -19,6 +20,19 @@ class Settings(BaseSettings):
     CAMERA_WIDTH: int = 640
     CAMERA_HEIGHT: int = 480
     CAMERA_FPS: int = 30
+
+    @field_validator('CAMERA_INDEX', mode='before')
+    @classmethod
+    def parse_camera_index(cls, v):
+        """Convert numeric strings to int for USB cameras"""
+        if isinstance(v, str):
+            # Try to convert to int for USB camera indices
+            try:
+                return int(v)
+            except ValueError:
+                # Not a number, return as-is (URL)
+                return v
+        return v
 
     # Model
     MODEL_PATH: str = "../models/yolov8n.pt"
