@@ -2,7 +2,7 @@
 
 AI-powered real-time pipeline defect detection system using YOLO and TensorFlow Lite. This system captures video from a USB camera, detects pipeline defects (cracks, rust, foreign objects, etc.), and generates comprehensive inspection reports.
 
-![System Architecture](docs/architecture.png)
+**📖 [View Detailed Architecture Documentation](docs/ARCHITECTURE.md)**
 
 ## Features
 
