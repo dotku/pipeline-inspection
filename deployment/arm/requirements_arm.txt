@@ -1,0 +1,45 @@
+# ARM Deployment Requirements
+# Optimized for ARM64 devices with NPU
+
+# Core Dependencies
+numpy==1.24.3
+opencv-python==4.8.1.78
+Pillow==10.2.0
+
+# TensorFlow Lite (choose one based on availability)
+# Option 1: Lightweight runtime (recommended for ARM)
+tflite-runtime==2.14.0
+
+# Option 2: Full TensorFlow (if tflite-runtime not available)
+# tensorflow==2.15.0
+
+# Web Framework (if running backend on ARM)
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+websockets==12.0
+
+# Report Generation
+reportlab==4.0.9
+python-dateutil==2.8.2
+
+# Utilities
+python-dotenv==1.0.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Optional: YOLO tools (only needed for model conversion)
+# ultralytics==8.1.0
+
+# NPU-specific libraries (install based on chip vendor)
+# Rockchip RK3588/RK3576:
+# rknn-toolkit2==1.6.0
+#
+# Amlogic:
+# Contact vendor for NPU SDK
+#
+# MediaTek:
+# Contact vendor for NPU SDK
+
+# Performance optimization
+# XNNPACK is included in tflite-runtime
