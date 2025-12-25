@@ -1,88 +1,30 @@
-# Git Repository Setup Guide
+# Git Monorepo Setup Guide
 
-## Current Issue
+## Fix Nested Repository Issue
 
-The frontend has its own git repository (created by `create-next-app`), causing a nested repository situation.
+The frontend has its own git repository (created by `create-next-app`). Let's fix this:
 
-## Recommended: Convert to Monorepo
-
-### Quick Fix (5 minutes)
+### Quick Fix (30 seconds)
 
 ```bash
 cd /Users/wlin/dev/pipeline-inspection
 
-# 1. Remove frontend's separate git repository
+# Remove frontend's separate git repository
 rm -rf frontend/.git
 
-# 2. Add frontend to main repository
+# Add frontend to main repository
 git add frontend/
 
-# 3. Check what will be committed
-git status
-
-# 4. Commit the integration
+# Commit the integration
 git commit -m "Integrate frontend into monorepo
 
-- Add Next.js frontend application
-- Real-time video streaming UI
-- Detection log and system status
-- Report generation interface
-- Responsive design for desktop and mobile
-
-Removed frontend's separate .git to consolidate into monorepo.
 Backend and frontend are tightly coupled and should version together."
 
-# 5. Verify clean state
-git status
+# Verify clean state
+git status  # Should show: working tree clean
 ```
 
-### Expected Output
-
-After running the above:
-```
-On branch main
-nothing to commit, working tree clean
-```
-
----
-
-## Why Monorepo?
-
-### ✅ Advantages for This Project
-
-1. **Tightly Coupled Components**
-   - Backend API ↔ Frontend UI
-   - WebSocket protocol
-   - Shared data types
-
-2. **Atomic Changes**
-   ```bash
-   # Single commit for API change + UI update
-   git commit -m "Add new detection class
-
-   - Backend: Add 'sediment' detection class
-   - Frontend: Add sediment display in UI"
-   ```
-
-3. **Simplified Deployment**
-   - One version number
-   - One tag for release
-   - Clear compatibility
-
-4. **Easier Development**
-   - One `git clone`
-   - No submodule complexity
-   - Shared scripts and configs
-
-### ❌ When to Use Separate Repos
-
-Only if:
-- Frontend can work with multiple backends
-- Different teams own different parts
-- Independent release cycles
-- Different deployment schedules
-
-**For this project:** These don't apply. Monorepo is ideal.
+✅ **Done!** Now you have a clean monorepo.
 
 ---
 
@@ -147,40 +89,6 @@ gh pr create --title "Add sediment detection"
 
 ---
 
-## Alternative: Separate Repos (Not Recommended)
-
-If you really want separate repos:
-
-### Setup
-
-```bash
-# 1. Create separate frontend repo
-cd /Users/wlin/dev
-mkdir pipeline-inspection-frontend
-mv pipeline-inspection/frontend/* pipeline-inspection-frontend/
-cd pipeline-inspection-frontend
-git init
-git add .
-git commit -m "Initial commit: Frontend"
-
-# 2. Update main repo
-cd ../pipeline-inspection
-git rm -rf frontend
-git commit -m "Remove frontend (moved to separate repo)"
-
-# 3. Add frontend as submodule (optional)
-git submodule add <frontend-repo-url> frontend
-```
-
-### Drawbacks
-
-❌ More complex setup
-❌ Versioning issues (which frontend works with which backend?)
-❌ Two PRs for related changes
-❌ Harder to keep in sync
-❌ Git submodules are tricky
-
----
 
 ## Current Repository Structure (Monorepo)
 
@@ -375,44 +283,21 @@ jobs:
 
 ---
 
-## Summary
+## Monorepo Benefits
 
-### ✅ Do This (Monorepo)
-```bash
-cd /Users/wlin/dev/pipeline-inspection
-rm -rf frontend/.git
-git add frontend/
-git commit -m "Integrate frontend into monorepo"
-```
+This project uses a monorepo because:
 
-### ❌ Don't Do This (Separate Repos)
-- Adds unnecessary complexity
-- Versioning nightmare
-- Not worth it for this project
+✅ **Atomic commits** - Change backend API + frontend UI together
+✅ **Version sync** - One version number, always compatible
+✅ **Simplified deployment** - One tag = one release
+✅ **Easier development** - One `git clone`, no submodules
 
 ---
 
-## Quick Action
+## Next Steps
 
-Run these commands now:
+After fixing the nested repo:
 
-```bash
-cd /Users/wlin/dev/pipeline-inspection
-
-# Remove nested git repo
-rm -rf frontend/.git
-
-# Add frontend to main repo
-git add frontend/
-
-# Commit
-git commit -m "Integrate frontend into monorepo
-
-Backend and frontend are tightly coupled and should be versioned together.
-This simplifies development, deployment, and version management."
-
-# Verify
-git status  # Should show: working tree clean
-```
-
-**Done!** You now have a clean monorepo. 🎉
+1. ✅ Continue normal development
+2. ✅ Commit related changes together
+3. ✅ Tag releases as a single unit
