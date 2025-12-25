@@ -6,6 +6,7 @@ import DetectionLog from "@/components/DetectionLog";
 import SystemStatus from "@/components/SystemStatus";
 import ReportGenerator from "@/components/ReportGenerator";
 import ServerConfig from "@/components/ServerConfig";
+import CameraSourceConfig from "@/components/CameraSourceConfig";
 import { Detection } from "@/types";
 import { getApiUrl } from "@/lib/config";
 
@@ -86,6 +87,7 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-2">
+              <CameraSourceConfig />
               <ServerConfig />
 
               <div

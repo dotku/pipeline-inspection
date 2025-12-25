@@ -17,7 +17,7 @@ import cv2
 import numpy as np
 
 from config import settings
-from camera import USBCamera
+from camera import Camera, USBCamera
 from yolo_detector import PipelineDefectDetector, Detection
 from report_generator import InspectionReportGenerator
 
@@ -45,12 +45,15 @@ app.add_middleware(
 )
 
 # Global instances
-camera = USBCamera()
+camera = Camera()
 detector = PipelineDefectDetector()
 report_generator = InspectionReportGenerator()
 
 # Active WebSocket connections
 active_connections: List[WebSocket] = []
+
+# Current camera source (can be changed at runtime)
+current_camera_source: Any = settings.CAMERA_INDEX
 
 
 # Pydantic models
@@ -72,6 +75,10 @@ class DetectionResponse(BaseModel):
     timestamp: str
 
 
+class CameraSourceRequest(BaseModel):
+    source: str  # Can be "0" for USB camera, "rtsp://..." for RTSP stream, or "http://..." for HTTP video
+
+
 # Startup event
 @app.on_event("startup")
 async def startup_event():
@@ -84,9 +91,9 @@ async def startup_event():
     else:
         logger.error("✗ Failed to load YOLO model")
 
-    # List available cameras
-    available_cameras = USBCamera.list_available_cameras()
-    logger.info(f"Available cameras: {available_cameras}")
+    # List available USB cameras
+    available_cameras = Camera.list_available_cameras()
+    logger.info(f"Available USB cameras: {available_cameras}")
 
     logger.info("System ready!")
 
@@ -117,7 +124,8 @@ async def system_status():
     return {
         "camera": {
             "is_opened": camera.is_opened,
-            "index": camera.camera_index,
+            "source": camera.camera_source,
+            "type": camera.source_type,
             "resolution": f"{camera.width}x{camera.height}",
             "fps": camera.fps
         },
@@ -135,11 +143,71 @@ async def system_status():
 
 @app.get("/api/cameras/list")
 async def list_cameras():
-    """List available cameras"""
-    available = USBCamera.list_available_cameras(max_index=5)
+    """List available USB cameras"""
+    available = Camera.list_available_cameras(max_index=5)
     return {
         "available_cameras": available,
-        "current_camera": camera.camera_index
+        "current_source": camera.camera_source,
+        "current_type": camera.source_type
+    }
+
+
+@app.post("/api/camera/source")
+async def set_camera_source(request: CameraSourceRequest):
+    """
+    Set camera source (USB index, RTSP URL, or HTTP video URL)
+
+    Examples:
+        - USB Camera: {"source": "0"} or {"source": 0}
+        - RTSP Stream: {"source": "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov"}
+        - HTTP Video: {"source": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4"}
+    """
+    global camera, current_camera_source
+
+    # Close existing camera
+    if camera.is_opened:
+        camera.close()
+
+    # Parse source (integer for USB, string for RTSP/HTTP)
+    try:
+        # Try to parse as integer for USB camera
+        source = int(request.source)
+    except ValueError:
+        # If not an integer, treat as URL (RTSP or HTTP)
+        source = request.source
+
+    # Create new camera instance with new source
+    camera = Camera(camera_source=source)
+    current_camera_source = source
+
+    # Try to open the camera
+    if camera.open():
+        # Format message based on source type
+        if camera.source_type == 'USB':
+            message = f"Camera source set to USB camera {source}"
+        else:
+            message = f"Camera source set to {camera.source_type} stream"
+
+        return {
+            "message": message,
+            "source": source,
+            "type": camera.source_type,
+            "status": "opened"
+        }
+    else:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to open camera source: {source}"
+        )
+
+
+@app.get("/api/camera/source")
+async def get_camera_source():
+    """Get current camera source"""
+    return {
+        "source": camera.camera_source,
+        "type": camera.source_type,
+        "is_opened": camera.is_opened
     }
 
 
