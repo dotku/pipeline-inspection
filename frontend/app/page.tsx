@@ -5,7 +5,9 @@ import VideoStream from "@/components/VideoStream";
 import DetectionLog from "@/components/DetectionLog";
 import SystemStatus from "@/components/SystemStatus";
 import ReportGenerator from "@/components/ReportGenerator";
+import ServerConfig from "@/components/ServerConfig";
 import { Detection } from "@/types";
+import { getApiUrl } from "@/lib/config";
 
 export default function Home() {
   const [detections, setDetections] = useState<Detection[]>([]);
@@ -16,7 +18,7 @@ export default function Home() {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/system/status");
+        const response = await fetch(getApiUrl("/api/system/status"));
         const data = await response.json();
         setSystemStatus(data);
       } catch (error) {
@@ -36,7 +38,7 @@ export default function Home() {
 
   const handleClearDetections = async () => {
     try {
-      await fetch("http://localhost:8000/api/detections/clear", {
+      await fetch(getApiUrl("/api/detections/clear"), {
         method: "DELETE",
       });
       setDetections([]);
@@ -84,6 +86,8 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-2">
+              <ServerConfig />
+
               <div
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
                   isConnected

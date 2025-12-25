@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Detection } from "@/types";
+import { getWebSocketUrl } from "@/lib/config";
 
 interface VideoStreamProps {
   onNewDetection: (detection: Detection) => void;
@@ -21,7 +22,7 @@ export default function VideoStream({
 
   useEffect(() => {
     const connectWebSocket = () => {
-      const ws = new WebSocket("ws://localhost:8000/ws/video");
+      const ws = new WebSocket(getWebSocketUrl("/ws/video"));
       wsRef.current = ws;
 
       ws.onopen = () => {

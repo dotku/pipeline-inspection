@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Detection, InspectionMetadata } from "@/types";
+import { getApiUrl } from "@/lib/config";
 
 interface ReportGeneratorProps {
   detections: Detection[];
@@ -29,7 +30,7 @@ export default function ReportGenerator({
     setIsGenerating(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/report/generate", {
+      const response = await fetch(getApiUrl("/api/report/generate"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,7 +48,7 @@ export default function ReportGenerator({
         if (data.files.pdf) {
           const reportId = data.files.pdf.split("_").pop()?.split(".")[0];
           window.open(
-            `http://localhost:8000/api/report/download/${reportId}?format=pdf`,
+            getApiUrl(`/api/report/download/${reportId}?format=pdf`),
             "_blank"
           );
         }
@@ -55,7 +56,7 @@ export default function ReportGenerator({
         if (data.files.json) {
           const reportId = data.files.json.split("_").pop()?.split(".")[0];
           window.open(
-            `http://localhost:8000/api/report/download/${reportId}?format=json`,
+            getApiUrl(`/api/report/download/${reportId}?format=json`),
             "_blank"
           );
         }
